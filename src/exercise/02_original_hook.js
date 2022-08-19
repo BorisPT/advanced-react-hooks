@@ -10,7 +10,7 @@ import {
   PokemonErrorBoundary,
 } from '../pokemon'
 
-const useAsync = (asyncCallback, initialState) => { 
+const useAsync = (asyncCallback, initialState, dependencies) => { 
 
 // interessante : define a generic reducer, for use in the "useReducer" hook that we'll use in this custom hook.
 function genericReducer(state, action) {
@@ -60,7 +60,7 @@ React.useEffect(() => {
 
   // 🐨 because of limitations with ESLint, you'll need to ignore
   // the react-hooks/exhaustive-deps rule. We'll fix this in an extra credit.
-}, [asyncCallback]);
+}, dependencies);
 
 return state;
 
@@ -68,6 +68,13 @@ return state;
 
 function PokemonInfo({pokemonName}) {
   
+  // 💰 look below to see how the useAsync hook is supposed to be called
+  // 💰 If you want some help, here's the function signature (or delete this
+  // comment really quick if you don't want the spoiler)!
+  // function useAsync(asyncCallback, initialState, dependencies) {/* code in here */}
+
+  // -------------------------- start --------------------------
+
   const asyncCallback = () => {
     if (!pokemonName) {
       return;
@@ -75,10 +82,8 @@ function PokemonInfo({pokemonName}) {
 
     return fetchPokemon(pokemonName);
   };
-
-  const memoizedAsync = React.useCallback(asyncCallback, [pokemonName]);
       
-  const state = useAsync(memoizedAsync, {status: pokemonName ? 'pending' : 'idle'});
+  const state = useAsync(asyncCallback, {status: pokemonName ? 'pending' : 'idle'}, [pokemonName]);
   
   const {data, status, error} = state
 
