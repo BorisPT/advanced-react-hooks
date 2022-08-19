@@ -1,7 +1,8 @@
 // useCallback: custom hooks
 // http://localhost:3000/isolated/exercise/02.js
 
-import * as React from 'react'
+import * as React from 'react';
+
 import {
   fetchPokemon,
   PokemonForm,
@@ -10,7 +11,7 @@ import {
   PokemonErrorBoundary,
 } from '../pokemon'
 
-const useAsync = (asyncCallback, initialState) => { 
+const useAsync = (initialState) => { 
 
 // interessante : define a generic reducer, for use in the "useReducer" hook that we'll use in this custom hook.
 function genericReducer(state, action) {
@@ -30,22 +31,15 @@ function genericReducer(state, action) {
   }
 }
 
-// interessante : define the reducer with the initial state, and complement it with the initial state
-// from outside. 
 const [state, dispatch] = React.useReducer(genericReducer, {
   status: 'idle',  
   data: null,
   error: null,
   ...initialState});
 
-React.useEffect(() => {
 
-  // interessante : this returns a promise, or it doesn't return anything. 
-  // Check the "function snippet" that was passed as parameter to this useAsync hook.
-  const promise = asyncCallback()
-   if (!promise) {
-     return
-   }
+// interessante : define an execution function that will be returned to the outside so it can be invoked by the client.
+const executeFunction = React.useCallback((promise) => { 
 
   dispatch({type: 'pending'});
 
@@ -57,31 +51,27 @@ React.useEffect(() => {
       dispatch({type: 'rejected', error})
     }
   );
+ }, [dispatch]);  
 
-  // 🐨 because of limitations with ESLint, you'll need to ignore
-  // the react-hooks/exhaustive-deps rule. We'll fix this in an extra credit.
-}, [asyncCallback]);
-
-return state;
+return {...state, run  : executeFunction };
 
  };
 
 function PokemonInfo({pokemonName}) {
-  
-  const asyncCallback = () => {
+       
+  const {data, status, error, run} = useAsync({status: pokemonName ? 'pending' : 'idle'});
+
+  React.useEffect(() => {
     if (!pokemonName) {
-      return;
+      return
     }
 
-    return fetchPokemon(pokemonName);
-  };
+    const pokemonPromise = fetchPokemon(pokemonName);
+    run(pokemonPromise)
+  }, [pokemonName, run])
 
-  const memoizedAsync = React.useCallback(asyncCallback, [pokemonName]);
-      
-  const state = useAsync(memoizedAsync, {status: pokemonName ? 'pending' : 'idle'});
+
   
-  const {data, status, error} = state
-
   switch (status) {
     case 'idle':
       return <span>Submit a pokemon</span>
