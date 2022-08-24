@@ -3,27 +3,34 @@
 
 import * as React from 'react'
 
-// 🐨 wrap this in a React.forwardRef and accept `ref` as the second argument
-function MessagesDisplay({messages}) {
+// interessante : define the function component as a function that accepts two arguments: the normal props, and a new one, "ref".
+// Wrap the container function with React.forwardRef
+const MessagesDisplay = React.forwardRef((props, ref) => {
   const containerRef = React.useRef()
   React.useLayoutEffect(() => {
     scrollToBottom()
   })
 
-  // 💰 you're gonna want this as part of your imperative methods
-  // function scrollToTop() {
-  //   containerRef.current.scrollTop = 0
-  // }
+  // interessante : define methods for manipulating the scrolling for this ui element.
+  // These functions will later be exposed to the parent component.
+  function scrollToTop() {
+    containerRef.current.scrollTop = 0
+  }
   function scrollToBottom() {
     containerRef.current.scrollTop = containerRef.current.scrollHeight
   }
 
-  // 🐨 call useImperativeHandle here with your ref and a callback function
-  // that returns an object with scrollToTop and scrollToBottom
+  // interessante : use the "ref" reference from outside and expose both methods so the parent can call them, using its own ref.
+  React.useImperativeHandle(ref, () => {
+    return {
+      scrollToBottom,
+      scrollToTop
+    }
+  });
 
   return (
     <div ref={containerRef} role="log">
-      {messages.map((message, index, array) => (
+      {props.messages.map((message, index, array) => (
         <div key={message.id}>
           <strong>{message.author}</strong>: <span>{message.content}</span>
           {array.length - 1 === index ? null : <hr />}
@@ -31,11 +38,12 @@ function MessagesDisplay({messages}) {
       ))}
     </div>
   )
-}
+});
 
 function App() {
   const messageDisplayRef = React.useRef()
   const [messages, setMessages] = React.useState(allMessages.slice(0, 8))
+
   const addMessage = () =>
     messages.length < allMessages.length
       ? setMessages(allMessages.slice(0, messages.length + 1))
@@ -45,6 +53,8 @@ function App() {
       ? setMessages(allMessages.slice(0, messages.length - 1))
       : null
 
+  // interessante : define the functions we got from the child component, to be used as click handlers.
+  // Note that the functions are associated with the "ref" that is defined by the parent component.
   const scrollToTop = () => messageDisplayRef.current.scrollToTop()
   const scrollToBottom = () => messageDisplayRef.current.scrollToBottom()
 
@@ -58,6 +68,8 @@ function App() {
       <div>
         <button onClick={scrollToTop}>scroll to top</button>
       </div>
+      {/* // interessante :  define the "ref" property. It was created by the parent and is passed here to the child component, 
+      to be used in the useImperativeHandle hook."*/}
       <MessagesDisplay ref={messageDisplayRef} messages={messages} />
       <div>
         <button onClick={scrollToBottom}>scroll to bottom</button>
