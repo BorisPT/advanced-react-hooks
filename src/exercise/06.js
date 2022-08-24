@@ -7,7 +7,7 @@ function useMedia(query, initialState = false) {
   const [state, setState] = React.useState(initialState)
   
   // interessante : use the "useDebugValue" hook to provide more information in the React developer tools plugin.
-  // Look for the png files for more information
+  // Look for the png files for more information. This only works for debug values inside custom hooks.
   // 💰 here's the formatted label I use: `\`${query}\` => ${state}`
   
   // React.useDebugValue(`\`${query}\` => ${state}`);
