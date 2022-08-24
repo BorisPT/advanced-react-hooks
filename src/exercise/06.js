@@ -5,8 +5,20 @@ import * as React from 'react'
 
 function useMedia(query, initialState = false) {
   const [state, setState] = React.useState(initialState)
-  // 🐨 call React.useDebugValue here.
+  
+  // interessante : use the "useDebugValue" hook to provide more information in the React developer tools plugin.
+  // Look for the png files for more information
   // 💰 here's the formatted label I use: `\`${query}\` => ${state}`
+  
+  // React.useDebugValue(`\`${query}\` => ${state}`);
+
+  // interessante : we can also pass a function to do the formating for the data we want to present.
+  // The first parameter, the object passed into "useDebugValue" will be passed as parametere to this formatter function.
+  const formatter = ({initialState , query}) => { 
+    return `NewFormat: ${query} ==> ${initialState}`;
+   };
+
+   React.useDebugValue({initialState : initialState, query : query}, formatter);
 
   React.useEffect(() => {
     let mounted = true
