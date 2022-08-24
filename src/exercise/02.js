@@ -51,7 +51,7 @@ const executeFunction = React.useCallback((promise) => {
       dispatch({type: 'rejected', error})
     }
   );
- }, [dispatch]);  
+ }, []);  
 
 return {...state, run  : executeFunction };
 

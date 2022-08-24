@@ -68,6 +68,8 @@ return state;
 
 function PokemonInfo({pokemonName}) {
   
+  // interessante : define the async callback and apply the "useCallback", with the [pokemonName].
+  // Use this memoized function as the parameter for our custom hook "useAsync".
   const asyncCallback = () => {
     if (!pokemonName) {
       return;
